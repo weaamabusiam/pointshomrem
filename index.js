@@ -37,6 +37,17 @@ app.patch('/points/:idx', (req, res) => {
     }
 });
 
+
+app.delete('/points/:idx', (req, res) => {
+    let idx = req.params.idx;
+    if (points[idx]) {
+        points.splice(idx, 1);
+        res.status(200).json(points);
+    } else {
+        res.status(400).json("נקודת שמירה לא נמצאה");
+    }
+});
+
 app.get('/points', (req, res) => {
     res.status(200).json(points);
 });
