@@ -13,3 +13,35 @@
     <input type="text" name="location" placeholder="מיקום" required>
     <button type="submit">הוסף נקודת שמירה</button>
 </form>
+
+<h2>רשימת נקודות השמירה</h2>
+<table>
+    <thead>
+    <tr>
+        <th>שם נקודת שמירה</th>
+        <th>מיקום</th>
+        <th>פעולות</th>
+    </tr>
+    </thead>
+    <tbody id="pointsTable">
+    </tbody>
+</table>
+
+<script>
+
+async function GetPoints() {
+let response = await fetch("/points");
+let points = await response.json();
+let rows = points.map((point, index) => `
+<tr>
+    <td>${point.pointName}</td>
+    <td>${point.location}</td>
+    <td>
+        <button onclick="editPoint(${index})">ערוך</button>
+        <button onclick="deletePoint(${index})">מחק</button>
+    </td>
+</tr>
+`);
+document.getElementById("pointsTable").innerHTML = rows.join('');
+}
+</script>
