@@ -18,6 +18,7 @@
     <tr>
         <th>שם נקודת שמירה</th>
         <th>מיקום</th>
+        <th>פעולות</th>
     </tr>
     </thead>
     <tbody id="MainTable">
@@ -62,10 +63,14 @@
     // מילוי טבלת נקודות השמירה
     function FillTable() {
         let s = "";
-        for (let point of pointsToShow) {
+        for (let i = 0; i < pointsToShow.length; i++) {
             s += `<tr>`;
-            s += `<td>${point.pointName}</td>`;
-            s += `<td>${point.location}</td>`;
+            s += `<td>${pointsToShow[i].pointName}</td>`;
+            s += `<td>${pointsToShow[i].location}</td>`;
+            s += `<td>
+                    <button onclick="editPoint(${points.indexOf(pointsToShow[i])})">ערוך</button>
+                    <button onclick="deletePoint(${points.indexOf(pointsToShow[i])})">מחק</button>
+                  </td>`;
             s += `</tr>`;
         }
         document.getElementById("MainTable").innerHTML = s;
@@ -89,6 +94,37 @@
         let data = await response.json();
         console.log(data);
         GetPoints(); // עדכון רשימת הנקודות לאחר ההוספה
+    }
+
+    // עריכת נקודת שמירה לפי אינדקס
+    async function editPoint(idx) {
+        let newPointName = prompt("הזן שם חדש לנקודה:", points[idx].pointName);
+        let newLocation = prompt("הזן מיקום חדש לנקודה:", points[idx].location);
+
+        if (newPointName && newLocation) {
+            let url = `/points/${idx}`;
+            let response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pointName: newPointName, location: newLocation })
+            });
+            let data = await response.json();
+            console.log(data);
+            GetPoints(); // עדכון הרשימה לאחר עריכה
+        }
+    }
+
+    // מחיקת נקודת שמירה לפי אינדקס
+    async function deletePoint(idx) {
+        let url = `/points/${idx}`;
+        let response = await fetch(url, {
+            method: 'DELETE'
+        });
+        let data = await response.json();
+        console.log(data);
+        GetPoints(); // עדכון הרשימה לאחר המחיקה
     }
 
     // קריאה ראשונית לקבלת כל נקודות השמירה מהשרת בעת טעינת הדף
