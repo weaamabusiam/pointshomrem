@@ -1,47 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="he">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ניהול נקודות שמירה</title>
     <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-<h1>ניהול נקודות שמירה</h1>
-
-<form id="addPointForm">
-    <input type="text" name="pointName" placeholder="שם נקודת השמירה" required>
-    <input type="text" name="location" placeholder="מיקום" required>
-    <button type="submit">הוסף נקודת שמירה</button>
-</form>
-
-<h2>רשימת נקודות השמירה</h2>
+<h1>רשימת נקודות שמירה</h1>
 <table>
     <thead>
     <tr>
+        <input type="text" oninput="getFiltered()" id="filt_txt" placeholder="סינון בשם נקודת שמירה" />
+        <button onclick="getFiltered()">סנן</button>
+    </tr>
+    <tr>
         <th>שם נקודת שמירה</th>
         <th>מיקום</th>
-        <th>פעולות</th>
     </tr>
     </thead>
-    <tbody id="pointsTable">
+    <tbody id="MainTable">
     </tbody>
 </table>
+<div class="GridContainer">
+    <h1>הוספת נקודת שמירה חדשה</h1>
+    <label for="PointName">שם נקודת שמירה</label>
+    <input type="text" id="PointName">
+    <label for="LocationName">מיקום</label>
+    <input type="text" id="LocationName">
+    <button onclick="AddPointToServer()">שמור</button>
+</div>
 
 <script>
+    let points = [];
+    let PointFilt = "";
+    let pointsToShow = points;
 
-async function GetPoints() {
-let response = await fetch("/points");
-let points = await response.json();
-let rows = points.map((point, index) => `
-<tr>
-    <td>${point.pointName}</td>
-    <td>${point.location}</td>
-    <td>
-        <button onclick="editPoint(${index})">ערוך</button>
-        <button onclick="deletePoint(${index})">מחק</button>
-    </td>
-</tr>
-`);
-document.getElementById("pointsTable").innerHTML = rows.join('');
-}
+    // קריאה לשרת לקבלת כל נקודות השמירה
+    async function GetPoints() {
+        let url = "/points";
+        let response = await fetch(url);
+        let data = await response.json();
+        console.log("GetPoints", data);
+        points = data;
+        pointsToShow = points;
+        FillTable();
+    }
+
+    // סינון נקודות השמירה לפי השם
+    function getFiltered() {
+        PointFilt = document.getElementById("filt_txt").value;
+        pointsToShow = points.filter(FilterData);
+        FillTable();
+    }
+
+    function FilterData(point) {
+        return point.pointName.includes(PointFilt);
+    }
+
+    // מילוי טבלת נקודות השמירה
+    function FillTable() {
+        let s = "";
+        for (let point of pointsToShow) {
+            s += `<tr>`;
+            s += `<td>${point.pointName}</td>`;
+            s += `<td>${point.location}</td>`;
+            s += `</tr>`;
+        }
+        document.getElementById("MainTable").innerHTML = s;
+    }
+
+    // הוספת נקודת שמירה חדשה לשרת
+    async function AddPointToServer() {
+        let point = {
+            pointName: document.getElementById("PointName").value,
+            location: document.getElementById("LocationName").value
+        };
+
+        let url = "/points";
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(point)
+        });
+        let data = await response.json();
+        console.log(data);
+        GetPoints(); // עדכון רשימת הנקודות לאחר ההוספה
+    }
+
+    // קריאה ראשונית לקבלת כל נקודות השמירה מהשרת בעת טעינת הדף
+    GetPoints();
 </script>
+</body>
+</html>
