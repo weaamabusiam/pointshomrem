@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>תיעוד ביקורי שמירה</title>
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+<h1>רשימת ביקורי שמירה</h1>
+
+<h2>רשימת ביקורים</h2>
+<table>
+  <thead>
+  <tr>
+    <th>שם נקודת שמירה</th>
+    <th>זמן ביקור</th>
+  </tr>
+  </thead>
+  <tbody id="visitsTable"></tbody>
+</table>
+
+<script>
+  function displayVisits() {
+    const visits = JSON.parse(localStorage.getItem("visits")) || [];
+    const tableBody = document.getElementById("visitsTable");
+    tableBody.innerHTML = visits.map(
+            visit => `<tr><td>${visit.pointName}</td><td>${new Date(visit.visitTime).toLocaleString()}</td></tr>`
+    ).join("");
+  }
+
+  displayVisits();
+</script>
+</body>
+</html>
