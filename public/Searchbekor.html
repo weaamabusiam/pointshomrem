@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>בחירת נקודת שמירה</title>
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+<h1>בחירת נקודת שמירה</h1>
+
+<!-- בחירת נקודת ביקור -->
+<select id="points_select"></select>
+<button onclick="saveVisit()">שמור ביקור</button>
+
+<!-- הודעה על שמירה מוצלחת -->
+<div id="msg" style="display: none;">הביקור נשמר בהצלחה!</div>
+
+<!-- טבלת ביקורים שמורה ב-localStorage -->
+<h2>רשימת ביקורים</h2>
+<table>
+    <thead>
+    <tr>
+        <th>שם נקודת שמירה</th>
+        <th>זמן ביקור</th>
+    </tr>
+    </thead>
+    <tbody id="visitsTable"></tbody>
+</table>
+
+<script>
+
+    async function loadPoints() {
+        const response = await fetch("/points");
+        const data = await response.json();
+        let options = data.map((point, index) =>
+            `<option value="${index}">${point.pointName} - ${point.location}</option>`
+        );
+        document.getElementById("points_select").innerHTML = options.join("");
+    }
+
+
+    function displayVisits() {
+        const visits = JSON.parse(localStorage.getItem("visits")) || [];
+        const tableBody = document.getElementById("visitsTable");
+        tableBody.innerHTML = visits.map(
+            visit => `<tr><td>${visit.pointName}</td><td>${new Date(visit.visitTime).toLocaleString()}</td></tr>`
+        ).join("");
+    }
+
+
+    function saveVisit() {
+        const pointId = document.getElementById("points_select").value;
+        const pointName = document.getElementById("points_select").options[pointId].text;
+        const visitData = { pointName, visitTime: new Date().toISOString() };
+
+        let visits = JSON.parse(localStorage.getItem("visits")) || [];
+        visits.push(visitData);
+        localStorage.setItem("visits", JSON.stringify(visits));
+
+
+        document.getElementById("msg").style.display = "block";
+        displayVisits();
+        setTimeout(() => document.getElementById("msg").style.display = "none", 2000);
+    }
+
+    loadPoints();
+    displayVisits();
+</script>
+</body>
+</html>
